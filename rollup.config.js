@@ -40,14 +40,6 @@ function addToBuild(options) {
 export default {
     input: 'src/index.js',
     output: [
-        {
-            file: outputName(pkg.browser),
-            format: 'umd',
-            name: pkg.umdName,
-            esModule: false,
-            sourcemap: !production,
-            strict: false,
-        },
         addToBuild({
             file: pkg.main,
             format: 'cjs',

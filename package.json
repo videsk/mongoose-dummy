@@ -1,22 +1,22 @@
 {
-  "name": "@videsk/rollup-library-template",
-  "umdName": "MyLibrary",
+  "name": "@videsk/mongoose-dummy",
+  "umdName": "MongooseDummy",
   "version": "1.0.0",
-  "description": "Template to compile library with Rollup",
+  "description": "Generate dummy data based on mongoose model schema.",
   "files": [
     "dist"
   ],
   "scripts": {
     "build": "rollup -c",
     "dev": "rollup -c -w",
-    "upload": "npm run build && npm publish"
+    "upload": "npm run build && npm publish",
+    "test": "mocha"
   },
-  "browser": "dist/name-library.min.js",
   "main": "dist/index.cjs.js",
   "module": "dist/index.esm.js",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/videsk/sdk-template.git"
+    "url": "git+https://github.com/videsk/mongoose-faker.git"
   },
   "keywords": [
     "videsk",
@@ -25,15 +25,21 @@
   "author": "Videsk <devs@videsk.io>",
   "license": "UNLICENSED",
   "bugs": {
-    "url": "https://github.com/videsk/sdk-template/issues"
+    "url": "https://github.com/videsk/mongoose-faker/issues"
   },
-  "homepage": "https://github.com/videsk/sdk-template#readme",
+  "homepage": "https://github.com/videsk/mongoose-faker#readme",
   "devDependencies": {
     "@rollup/plugin-commonjs": "^19.0.2",
     "@rollup/plugin-node-resolve": "^13.0.4",
     "@rollup/plugin-replace": "^3.0.0",
+    "chai": "^4.3.4",
+    "mocha": "^9.1.3",
+    "mongoose": "^6.0.14",
     "rollup": "^2.55.0",
     "rollup-plugin-livereload": "^2.0.5",
     "rollup-plugin-terser": "^7.0.2"
+  },
+  "dependencies": {
+    "faker": "^5.5.3"
   }
 }
