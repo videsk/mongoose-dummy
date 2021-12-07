@@ -180,7 +180,7 @@ function casualIntegration(key, ...args) {
     return helper;
 }
 
-const output = await dummy.setup({ mock: (key) => casual[key] }).model('users').generate();
+const output = await dummy.setup({ mock: casualIntegration }).model('users').generate();
 // This setup mock as function of faker.fake(mustacheTemplate);
 ```
 
