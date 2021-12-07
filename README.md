@@ -4,7 +4,8 @@ A random data generator library based on mongoose schema, with very flexible imp
 
 ![Snyk Vulnerabilities for GitHub Repo](https://img.shields.io/snyk/vulnerabilities/github/videsk/mongoose-dummy)
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/videsk/mongoose-dummy?display_name=tag)
-![Codecov](https://img.shields.io/codecov/c/github/videsk/mongoose-dummy)
+[![Maintainability](https://api.codeclimate.com/v1/badges/d5e306c79262abc19e62/maintainability)](https://codeclimate.com/github/videsk/mongoose-dummy/maintainability)
+[![Test Coverage](https://api.codeclimate.com/v1/badges/d5e306c79262abc19e62/test_coverage)](https://codeclimate.com/github/videsk/mongoose-dummy/test_coverage)
 
 # How to install
 
