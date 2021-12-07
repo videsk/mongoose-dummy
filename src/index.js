@@ -33,7 +33,7 @@ class MongooseDummy {
 
     getModel(modelName) {
         if (!(modelName in this.schemas)) throw new Error(`The model name "${modelName}" is not present in schema models. Is case sensitive!`);
-        return JSON.parse(JSON.stringify(this.schemas[modelName].schema.obj));
+        return this.schemas[modelName].schema.obj;
     }
 
     mockProxy(template) {
@@ -98,12 +98,14 @@ class MongooseDummy {
             return this.getModel(schemaName);
         }
 
-        const getValidSchema = (schema) => 'type' in schema ? schema.type : schema;
+        const getValidSchema = (schema) => Array.isArray(schema.type) ? schema.type : schema;
+
+        const isValidType = (schema) => typeof schema === 'object' && 'type' in schema && Array.isArray(schema.type);
 
         // Check if the object on array contains more data or needs to return single value
         const isArrayObject = (object) => !(Object.keys(object).some(key => typeof object[key] === 'object')) && 'dummy' in object;
 
-        const iterate = (object = {}, deep = true, parent = '') => {
+        const iterate = (object = {}, deep = true) => {
             const output = {};
             if (typeof object !== 'object') return object;
             if (isArrayObject(object)) return getFakeValue(object);
@@ -114,7 +116,7 @@ class MongooseDummy {
                     const needsPopulate = populate(value) && deep;
                     output[key] = iterate(needsPopulate ? getSchema(value) : value, !needsPopulate);
                 }
-                else if (isArrayIterable(value) || (filterValue && ('dummy' in value || 'enum' in value || 'type' in value))) output[key] = getFakeValue(getValidSchema(value));
+                else if (isArrayIterable(value) || (filterValue && ('dummy' in value || 'enum' in value || isValidType(value)))) output[key] = getFakeValue(getValidSchema(value));
             }
             return output;
         }
