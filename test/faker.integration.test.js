@@ -46,4 +46,24 @@ describe('Faker integration', function () {
         expect(Array.isArray(output)).to.be.equal(true);
     });
 
+    it('Iterate model with mixed dummy value, functions, strings and faker as mock function', async () => {
+        const dummy = new MongooseDummy(mongoose);
+        const model = dummy.schemas.product.schema.obj;
+
+        function containsState(value) {
+            return model.state.dummy.includes(value);
+        }
+
+        const output = await dummy.setup({ mock: faker.fake }).iterateModel(model);
+        expect(typeof output).to.be.equal('object');
+        expect('name' in output).to.be.equal(true);
+        expect('price' in output).to.be.equal(true);
+        expect('stock' in output).to.be.equal(true);
+        expect('state' in output).to.be.equal(true);
+        expect(typeof output.name).to.be.equal('string');
+        expect(typeof output.price).to.be.equal('number');
+        expect(output.stock % 3).to.be.equal(0);
+        expect(containsState(output.state)).to.be.equal(true);
+    });
+
 });
