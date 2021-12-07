@@ -3,9 +3,12 @@
 A random data generator library based on mongoose schema, with very flexible implementation directly on yours mongoose models with populate feature, enum random selection, filter fields, and fully compatible with all random/fake data generator libraries.
 
 ![Snyk Vulnerabilities for GitHub Repo](https://img.shields.io/snyk/vulnerabilities/github/videsk/mongoose-dummy)
-![GitHub release (latest by date)](https://img.shields.io/github/v/release/videsk/mongoose-dummy?display_name=tag)
+![GitHub branch checks state](https://img.shields.io/github/checks-status/videsk/mongoose-dummy/main)
 [![Maintainability](https://api.codeclimate.com/v1/badges/d5e306c79262abc19e62/maintainability)](https://codeclimate.com/github/videsk/mongoose-dummy/maintainability)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/d5e306c79262abc19e62/test_coverage)](https://codeclimate.com/github/videsk/mongoose-dummy/test_coverage)
+![GitHub](https://img.shields.io/github/license/videsk/mongoose-dummy)
+![GitHub tag (latest SemVer)](https://img.shields.io/github/v/tag/videsk/mongoose-dummy)
+![GitHub commit activity (branch)](https://img.shields.io/github/commit-activity/w/videsk/mongoose-dummy)
 
 # How to install
 
