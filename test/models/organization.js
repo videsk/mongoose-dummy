@@ -4,7 +4,6 @@ module.exports = function (mongoose) {
         name: {
             type: String,
             dummy: '{{company.companyName}}',
-            webhook: true
         },
         address: {
             type: Object,
@@ -27,11 +26,9 @@ module.exports = function (mongoose) {
                 user: {
                     type: mongoose.Schema.Types.ObjectId,
                     ref: 'users',
-                    webhook: true,
-                    populate: true
+                    dummy: '{{datatype.uuid}}'
                 },
                 date: {
-                    webhook: true,
                     dummy: '{{date.past}}'
                 }
             }
@@ -42,14 +39,11 @@ module.exports = function (mongoose) {
                 url: {
                     type: String,
                     dummy: '{{internet.url}}',
-                    webhook: true
                 },
                 database: {
                     type: String,
                     dummy: '{{database.type}}',
-                    webhook: true
                 },
-                webhook: true
             }
         ]
     });
