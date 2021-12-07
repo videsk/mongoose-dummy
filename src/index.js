@@ -41,7 +41,8 @@ class MongooseDummy {
         const mustache = new RegExp(/{{\s?([^}]*)\s?}}/, 'i');
 
         const typeofTemplate = typeof template;
-        if (typeofTemplate === 'function') return template(mock);
+        if (typeofTemplate === 'function') return template(mock); // @todo: this is not working properly
+        // @todo: add support for arrays
         else if (!faker || typeofTemplate !== 'string' || !mustache.test(template)) return mock(template);
 
         let [ category = '', type = '' ] = template.split('.');
@@ -57,7 +58,13 @@ class MongooseDummy {
             array: () => mock(template).split(','),
         }
 
-        const categories = { datatype };
+        const date = {
+            past: () => new Date(mock(template)).toISOString(),
+            future: () => new Date(mock(template)).toISOString(),
+            recent: () => new Date(mock(template)).toISOString(),
+        }
+
+        const categories = { datatype, date };
         return category in categories && type in categories[category] ? categories[category][type]() : mock(template);
     }
 
@@ -69,15 +76,15 @@ class MongooseDummy {
         const getValue = (schema = {}) => typeof schema === 'object' && 'obj' in schema ? schema.obj : schema;
 
         const getFakeValue = (object = {}) => {
-            if (Array.isArray(object)) return new Array(arrayLength).fill(0).map(() => iterate(object[0])); // If is array return 3 values and iterate
+            if (Array.isArray(object)) return new Array(arrayLength).fill(0).map(() => iterate(getValue(object[0]))); // If is array return 3 values and iterate
             return 'enum' in object ? object.enum[Math.floor(Math.random() * object.enum.length)] : this.mockProxy(object.dummy);
         }
 
         // Check if needs find deeper in keys
-        const iterable = (object = {}) => typeof object === 'object' && !Array.isArray(object) && !('dummy' in object) && !('enum' in object) && (populate(object) || Object.keys(object).some(key => typeof object[key] === 'object'));
+        const iterable = (object = {}) => typeof object === 'object' && !Array.isArray(object) && !('dummy' in object) && !('enum' in object) && (populate(object) || Object.keys(object).some(key => !Array.isArray(object[key]) && typeof object[key] === 'object'));
 
         // Check if is iterable array based and apply filters
-        const isArrayIterable = (array = []) => Array.isArray(array) && queries(array[0]);
+        const isArrayIterable = (array = []) => Array.isArray(array) && array.length > 0 && queries(getValue(array[0]));
 
         // Check if is object and array, and apply filters
         const applyFilter = (object = {}, query = () => true) => typeof object === 'object' && query(object);
@@ -91,10 +98,12 @@ class MongooseDummy {
             return this.getModel(schemaName);
         }
 
+        const getValidSchema = (schema) => 'type' in schema ? schema.type : schema;
+
         // Check if the object on array contains more data or needs to return single value
         const isArrayObject = (object) => !(Object.keys(object).some(key => typeof object[key] === 'object')) && 'dummy' in object;
 
-        const iterate = (object = {}, deep = true) => {
+        const iterate = (object = {}, deep = true, parent = '') => {
             const output = {};
             if (typeof object !== 'object') return object;
             if (isArrayObject(object)) return getFakeValue(object);
@@ -105,7 +114,7 @@ class MongooseDummy {
                     const needsPopulate = populate(value) && deep;
                     output[key] = iterate(needsPopulate ? getSchema(value) : value, !needsPopulate);
                 }
-                else if (isArrayIterable(value) || (filterValue && ('dummy' in value || 'enum' in value))) output[key] = getFakeValue(value);
+                else if (isArrayIterable(value) || (filterValue && ('dummy' in value || 'enum' in value || 'type' in value))) output[key] = getFakeValue(getValidSchema(value));
             }
             return output;
         }
