@@ -46,5 +46,7 @@
   "dependencies": {
     "faker": "^5.5.3"
   },
-  "branches": ["main"]
+  "release": {
+    "branches": ["main"]
+  }
 }
