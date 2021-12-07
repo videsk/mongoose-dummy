@@ -9,17 +9,17 @@
  *
 */
 
-const faker = require('faker');
-
 class MongooseDummy {
 
     constructor(mongoose) {
+        if (!mongoose) throw new Error('Pass a valid mongoose instance.');
         this.mongooseInstance = mongoose;
         this.schemas = mongoose.models;
     }
 
     setup(parameters) {
         this.config = parameters;
+        return this;
     }
 
     generate(queries = () => true) {
@@ -32,50 +32,55 @@ class MongooseDummy {
     }
 
     getModel(modelName) {
-        if (!(modelName in this.schemas)) throw new Error('The model name "${modelName}" is not present in schema models. Is case sensitive!');
+        if (!(modelName in this.schemas)) throw new Error(`The model name "${modelName}" is not present in schema models. Is case sensitive!`);
         return JSON.parse(JSON.stringify(this.schemas[modelName].schema.obj));
     }
 
-    static getDummy(model) {
-        return model.dummy;
-    }
+    mockProxy(template) {
+        const { mock = value => value, faker = false } = this.config || {};
+        const mustache = new RegExp(/{{\s?([^}]*)\s?}}/, 'i');
 
-    fakerProxy(template = '') {
-        let [ category, type ] = template.split('.');
+        const typeofTemplate = typeof template;
+        if (typeofTemplate === 'function') return template(mock);
+        else if (!faker || typeofTemplate !== 'string' || !mustache.test(template)) return mock(template);
+
+        let [ category = '', type = '' ] = template.split('.');
 
         category = category.slice(2);
         type = type.slice(0, type.length - 2);
 
         const datatype = {
-            number: () => parseInt(faker.fake(template)),
-            float: () => parseFloat(faker.fake(template)),
-            boolean: () => JSON.parse(faker.fake(template)),
-            json: () => JSON.parse(faker.fake(template)),
-            array: () => faker.fake(template).split(','),
+            number: () => parseInt(mock(template)),
+            float: () => parseFloat(mock(template)),
+            boolean: () => JSON.parse(mock(template)),
+            json: () => JSON.parse(mock(template)),
+            array: () => mock(template).split(','),
         }
 
         const categories = { datatype };
-        return category in categories && type in categories[category] ? categories[category][type]() : faker.fake(template);
+        return category in categories && type in categories[category] ? categories[category][type]() : mock(template);
     }
 
     iterateModel(model = {}, queries = () => true) {
 
+        const { arrayLength = 3 } = this.config || {};
+
         // Get value of schema. In case of ref the data is nested on obj key
-        const getValue = (schema = {}) => schema instanceof Object && 'obj' in schema ? schema.obj : schema;
+        const getValue = (schema = {}) => typeof schema === 'object' && 'obj' in schema ? schema.obj : schema;
 
         const getFakeValue = (object = {}) => {
-            if (object instanceof Array) return new Array(3).fill(0).map(() => iterate(object[0])); // If is array return 3 values and iterate
-            return 'enum' in object ? object.enum[Math.floor(Math.random() * object.enum.length)] : this.fakerProxy(object.dummy);
+            if (Array.isArray(object)) return new Array(arrayLength).fill(0).map(() => iterate(object[0])); // If is array return 3 values and iterate
+            return 'enum' in object ? object.enum[Math.floor(Math.random() * object.enum.length)] : this.mockProxy(object.dummy);
         }
 
         // Check if needs find deeper in keys
-        const iterable = (object = {}) => object instanceof Object && !Array.isArray(object) && !('dummy' in object) && !('enum' in object) && (populate(object) || Object.keys(object).some(key => object[key] instanceof Object));
+        const iterable = (object = {}) => typeof object === 'object' && !Array.isArray(object) && !('dummy' in object) && !('enum' in object) && (populate(object) || Object.keys(object).some(key => typeof object[key] === 'object'));
 
         // Check if is iterable array based and apply filters
         const isArrayIterable = (array = []) => Array.isArray(array) && queries(array[0]);
 
         // Check if is object and array, and apply filters
-        const applyFilter = (object = {}, query = () => true) => object instanceof Object && query(object);
+        const applyFilter = (object = {}, query = () => true) => typeof object === 'object' && query(object);
 
         // Populate on object with ref
         const populate = (object = {}) => 'ref' in object && object.populate;
@@ -87,11 +92,11 @@ class MongooseDummy {
         }
 
         // Check if the object on array contains more data or needs to return single value
-        const isArrayObject = (object) => !(Object.keys(object).some(key => object[key] instanceof Object)) && 'dummy' in object;
+        const isArrayObject = (object) => !(Object.keys(object).some(key => typeof object[key] === 'object')) && 'dummy' in object;
 
         const iterate = (object = {}, deep = true) => {
             const output = {};
-            if (!(object instanceof Object)) return object;
+            if (typeof object !== 'object') return object;
             if (isArrayObject(object)) return getFakeValue(object);
             for (const key in object) {
                 const value = getValue(object[key]);
@@ -105,7 +110,7 @@ class MongooseDummy {
             return output;
         }
 
-        return iterate(model);
+        return new Promise(resolve => resolve(iterate(model)));
     }
 
 }
