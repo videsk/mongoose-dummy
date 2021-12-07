@@ -42,7 +42,7 @@ class MongooseDummy {
 
         const typeofTemplate = typeof template;
         if (typeofTemplate === 'function') return template(mock); // @todo: this is not working properly
-        // @todo: add support for arrays
+        else if (Array.isArray(template)) return template[Math.floor(Math.random() * template.length)];
         else if (!faker || typeofTemplate !== 'string' || !mustache.test(template)) return mock(template);
 
         let [ category = '', type = '' ] = template.split('.');
