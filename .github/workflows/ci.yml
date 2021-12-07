@@ -39,8 +39,6 @@ jobs:
       - name: Install dependencies
         run: npm ci --ignore-scripts
 
-      - uses: actions/checkout@v2
-
       - name: Upload coverage
         uses: paambaati/codeclimate-action@v3.0.0
         env:
