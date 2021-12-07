@@ -87,17 +87,18 @@ describe('Test methods of MongooseDummy', function () {
 
     it('Iterate model', async () => {
         const dummy = new MongooseDummy(mongoose);
-        const model = JSON.parse(JSON.stringify(dummy.schemas.user.schema.obj));
+        const model = dummy.schemas.user.schema.obj;
         const output = await dummy.iterateModel(model);
         expect(typeof output).to.be.equal('object');
         expect('name' in output).to.be.equal(true);
+        expect('org' in output).to.be.equal(false);
         expect(typeof output.name).to.be.equal('string');
         expect(output.name).to.be.equal(model.name.dummy);
     });
 
     it('Iterate model deeper', async () => {
         const dummy = new MongooseDummy(mongoose);
-        const model = JSON.parse(JSON.stringify(dummy.schemas.organization.schema.obj));
+        const model = dummy.schemas.organization.schema.obj;
         const output = await dummy.iterateModel(model);
         expect(typeof output).to.be.equal('object');
         expect('name' in output).to.be.equal(true);
@@ -126,7 +127,7 @@ describe('Test methods of MongooseDummy', function () {
 
     it('Iterate model with fixed value', async () => {
         const dummy = new MongooseDummy(mongoose);
-        const model = JSON.parse(JSON.stringify(dummy.schemas.organization.schema.obj));
+        const model = dummy.schemas.organization.schema.obj;
         const output = await dummy.setup({ mock: () => true }).iterateModel(model);
         expect(typeof output).to.be.equal('object');
         expect('name' in output).to.be.equal(true);
@@ -156,7 +157,7 @@ describe('Test methods of MongooseDummy', function () {
     it('Iterate model with custom array length', async () => {
         const arrayLength = 20;
         const dummy = new MongooseDummy(mongoose);
-        const model = JSON.parse(JSON.stringify(dummy.schemas.organization.schema.obj));
+        const model = dummy.schemas.organization.schema.obj;
         const output = await dummy.setup({ mock: () => true, arrayLength }).iterateModel(model);
         expect(typeof output).to.be.equal('object');
         expect('users' in output).to.be.equal(true);
@@ -169,7 +170,7 @@ describe('Test methods of MongooseDummy', function () {
 
     it('Iterate model with random value from enum', async () => {
         const dummy = new MongooseDummy(mongoose);
-        const model = JSON.parse(JSON.stringify(dummy.schemas.commit.schema.obj));
+        const model = dummy.schemas.commit.schema.obj;
         const output = await dummy.setup({ mock: () => true }).iterateModel(model);
         expect(output instanceof Object).to.be.equal(true);
         expect('type' in output).to.be.equal(true);
@@ -181,6 +182,50 @@ describe('Test methods of MongooseDummy', function () {
         expect(output.message).to.be.equal(true);
         expect(typeof output.user).to.be.equal('object');
         expect(output.user.name).to.be.equal(true);
+    });
+
+    it('Iterate model with type as array', async () => {
+        const dummy = new MongooseDummy(mongoose);
+        const model = dummy.schemas.exam.schema.obj;
+        const output = await dummy.setup({ mock: () => true }).iterateModel(model);
+        expect(typeof output).to.be.equal('object');
+        expect('name' in output).to.be.equal(true);
+        expect('answers' in output).to.be.equal(true);
+        expect(Array.isArray(output.answers)).to.be.equal(true);
+        output.answers.forEach(object => {
+            expect(typeof object).to.be.equal('object');
+            expect('question' in object).to.be.equal(true);
+            expect('answer' in object).to.be.equal(true);
+            expect('scores' in object).to.be.equal(true);
+            expect(object.question).to.be.equal(true);
+            expect(object.answer).to.be.equal(true);
+            expect(Array.isArray(object.scores)).to.be.equal(true);
+            object.scores.forEach(object2 => {
+                expect(typeof object2).to.be.equal('object');
+                expect('score' in object2).to.be.equal(true);
+                expect(object2.score).to.be.equal(true);
+            });
+        });
+    });
+
+    it('Iterate model with mixed dummy value, functions and strings', async () => {
+        const dummy = new MongooseDummy(mongoose);
+        const model = dummy.schemas.product.schema.obj;
+
+        function containsState(value) {
+            return model.state.dummy.includes(value);
+        }
+
+        const output = await dummy.setup({ mock: () => 99 }).iterateModel(model);
+        expect(typeof output).to.be.equal('object');
+        expect('name' in output).to.be.equal(true);
+        expect('price' in output).to.be.equal(true);
+        expect('stock' in output).to.be.equal(true);
+        expect('state' in output).to.be.equal(true);
+        expect(output.name).to.be.equal(99);
+        expect(typeof output.price).to.be.equal('number');
+        expect(output.stock % 3).to.be.equal(0);
+        expect(containsState(output.state)).to.be.equal(true);
     });
 
     it('Iterate model through wrapper', async () => {
