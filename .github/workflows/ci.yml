@@ -19,7 +19,6 @@ jobs:
           registry-url: https://registry.npmjs.org
 
       - name: Install dependencies
-        if: steps.cache.outputs.cache-hit != 'true'
         run: npm ci --ignore-scripts
 
       - name: Running test
@@ -38,25 +37,16 @@ jobs:
           registry-url: https://registry.npmjs.org
 
       - name: Install dependencies
-        if: steps.cache.outputs.cache-hit != 'true'
         run: npm ci --ignore-scripts
 
-      - name: Running coverage
-        run: npm run coverage:report
-
-  push-results:
-    runs-on: ubuntu-latest
-    needs: [test, coverage]
-
-    steps:
       - uses: actions/checkout@v2
 
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v2
+      - name: Upload coverage
+        uses: paambaati/codeclimate-action@v3.0.0
+        env:
+          CC_TEST_REPORTER_ID: ${{secrets.CODECLIMATE_REPORTER_ID}}
         with:
-          token: ${{secrets.CODECOV_TOKEN}}
-          fail_ci_if_error: true
-          verbose: true
+          coverageCommand: npm run coverage:report
 
       - name: Send to FOSSA
         uses: fossas/fossa-action@main
