@@ -10,8 +10,8 @@
     "dev": "rollup -c -w",
     "upload": "npm run build && npm publish",
     "test": "mocha",
-    "coverage": "./node_modules/nyc/bin/nyc npm run test",
-    "coverage:report": "./node_modules/nyc/bin/nyc --reporter=lcov --reporter=text mocha"
+    "coverage": "./node_modules/nyc/bin/nyc.js npm run test",
+    "coverage:report": "./node_modules/nyc/bin/nyc.js --reporter=lcov --reporter=text mocha"
   },
   "main": "dist/index.cjs.js",
   "module": "dist/index.esm.js",
