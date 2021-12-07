@@ -14,6 +14,10 @@ module.exports = function (mongoose) {
             type: String,
             dummy: mock => mock('{{datatype.number}}') * 3,
         },
+        state: {
+            type: String,
+            dummy: ['new', 'used', 'refused']
+        }
     });
 
     return mongoose.model('product', schema);
