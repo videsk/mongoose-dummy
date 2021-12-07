@@ -239,4 +239,4 @@ Run `npm run test` to execute with mocha, `npm run coverage` to execute mocha wi
 
 LGPL-2.1 License - By Videsk™
 
-[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fvidesk%2Fmongoose-dummy.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fvidesk%2Fmongoose-dummy?ref=badge_large)
+[![FOSSA Status](https://app.fossa.com/api/projects/custom%2B15700%2Fgithub.com%2Fvidesk%2Fmongoose-dummy.svg?type=large)](https://app.fossa.com/projects/custom%2B15700%2Fgithub.com%2Fvidesk%2Fmongoose-dummy?ref=badge_large)

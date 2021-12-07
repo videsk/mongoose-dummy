@@ -40,9 +40,11 @@
     "nyc": "^15.1.0",
     "rollup": "^2.55.0",
     "rollup-plugin-livereload": "^2.0.5",
-    "rollup-plugin-terser": "^7.0.2"
+    "rollup-plugin-terser": "^7.0.2",
+    "semantic-release": "^18.0.1"
   },
   "dependencies": {
     "faker": "^5.5.3"
-  }
+  },
+  "branches": ["main"]
 }
