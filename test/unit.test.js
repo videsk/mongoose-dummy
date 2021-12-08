@@ -228,6 +228,21 @@ describe('Test methods of MongooseDummy', function () {
         expect(containsState(output.state)).to.be.equal(true);
     });
 
+    it('Iterate model with a fields as function return object', async () => {
+        const dummy = new MongooseDummy(mongoose);
+        const model = dummy.schemas.product.schema.obj;
+
+        const output = await dummy.setup({ mock: () => 99 }).iterateModel(model);
+        expect(typeof output).to.be.equal('object');
+        expect('variants' in output).to.be.equal(true);
+        expect(typeof output.variants).to.be.equal('object');
+        expect('type' in output.variants).to.be.equal(true);
+        expect('dummy' in output.variants).to.be.equal(true);
+        expect(typeof output.variants.type).to.be.equal('function');
+        expect(output.variants.type.name).to.be.equal('Array');
+        expect(typeof output.variants.dummy).to.be.equal('function');
+    });
+
     it('Iterate model through wrapper', async () => {
         const dummy = new MongooseDummy(mongoose);
         const output = await dummy.model('user').generate();

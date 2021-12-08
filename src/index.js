@@ -36,12 +36,12 @@ class MongooseDummy {
         return this.schemas[modelName].schema.obj;
     }
 
-    mockProxy(template) {
+    mockProxy(template, data) {
         const { mock = value => value, faker = false } = this.config || {};
         const mustache = new RegExp(/{{\s?([^}]*)\s?}}/, 'i');
 
         const typeofTemplate = typeof template;
-        if (typeofTemplate === 'function') return template(mock); // @todo: this is not working properly
+        if (typeofTemplate === 'function') return template(mock, data);
         else if (Array.isArray(template)) return template[Math.floor(Math.random() * template.length)];
         else if (!faker || typeofTemplate !== 'string' || !mustache.test(template)) return mock(template);
 
@@ -77,7 +77,7 @@ class MongooseDummy {
 
         const getFakeValue = (object = {}) => {
             if (Array.isArray(object)) return new Array(arrayLength).fill(0).map(() => iterate(getValue(object[0]))); // If is array return 3 values and iterate
-            return 'enum' in object ? object.enum[Math.floor(Math.random() * object.enum.length)] : this.mockProxy(object.dummy);
+            return 'enum' in object ? object.enum[Math.floor(Math.random() * object.enum.length)] : this.mockProxy(object.dummy, object);
         }
 
         // Check if needs find deeper in keys
