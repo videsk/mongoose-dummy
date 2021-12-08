@@ -17,7 +17,11 @@ module.exports = function (mongoose) {
         state: {
             type: String,
             dummy: ['new', 'used', 'refused']
-        }
+        },
+        variants: {
+            type: Array,
+            dummy: (_, data) => data,
+        },
     });
 
     return mongoose.model('product', schema);
