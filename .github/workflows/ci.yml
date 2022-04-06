@@ -45,8 +45,3 @@ jobs:
           CC_TEST_REPORTER_ID: ${{secrets.CODECLIMATE_REPORTER_ID}}
         with:
           coverageCommand: npm run coverage:report
-
-      - name: Send to FOSSA
-        uses: fossas/fossa-action@main
-        with:
-          api-key: ${{secrets.FOSSA_API_KEY}}
