@@ -29,6 +29,12 @@ module.exports = function (mongoose) {
         },
         answers: {
             type: [answers],
+            required: true,
+            index: true,
+            validate: {
+                validator: value => Array.isArray(value),
+                message: () => 'Testing value :)',
+            },
         },
     });
 
