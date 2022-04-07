@@ -15,6 +15,7 @@ class MongooseDummy {
         if (!mongoose) throw new Error('Pass a valid mongoose instance.');
         this.mongooseInstance = mongoose;
         this.schemas = mongoose.models;
+        this.reserved = this.constructor.reservedKeys();
     }
 
     /**
@@ -104,6 +105,8 @@ class MongooseDummy {
 
         const { arrayLength = 3, fieldKey = 'dummy' } = this.config || {};
 
+        const isNotReserved = (key) => !this.reserved.includes(key);
+
         /**
          * Get value of schema. In case of ref the data is nested on obj key
          * @param schema {Object} - Schema or model
@@ -126,7 +129,7 @@ class MongooseDummy {
          * @param object {Object} - Model
          * @returns {false|*|boolean}
          */
-        const iterable = (object = {}) => typeof object === 'object' && !Array.isArray(object) && !(fieldKey in object) && !('enum' in object) && (populate(object) || Object.keys(object).some(key => !Array.isArray(object[key]) && typeof object[key] === 'object'));
+        const iterable = (object = {}) => typeof object === 'object' && !Array.isArray(object) && !(fieldKey in object) && !('enum' in object) && (populate(object) || Object.keys(object).some(key => isNotReserved(key) && !Array.isArray(object[key]) && typeof object[key] === 'object'));
 
         /**
          * Check if is iterable array based and apply filters
@@ -204,6 +207,10 @@ class MongooseDummy {
         }
 
         return new Promise(resolve => resolve(iterate(model)));
+    }
+
+    static reservedKeys() {
+        return ['_posts', '_pres', 'collection', 'emit', 'errors', 'get', 'init', 'isModified', 'isNew', 'listeners', 'modelName', 'on', 'once', 'populated', 'prototype', 'remove', 'removeListener', 'save', 'schema', 'toObject', 'validate']
     }
 
 }
