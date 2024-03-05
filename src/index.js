@@ -15,7 +15,10 @@ class MongooseDummy {
         if (!mongoose) throw new Error('Pass a valid mongoose instance.');
         this.mongooseInstance = mongoose;
         this.schemas = mongoose.models;
-        this.reserved = this.constructor.reservedKeys();
+    }
+
+    get reserved() {
+        return this.constructor.reservedKeys;
     }
 
     /**
@@ -194,7 +197,9 @@ class MongooseDummy {
             const output = {};
             if (typeof object !== 'object') return object;
             if (isArrayObject(object)) return getFakeValue(object);
-            for (const key in object) {
+            if (typeof object === 'object' && fieldKey in object) return getFakeValue(object);
+            for await (const key of Object.keys(object)) {
+                if (this.reserved.includes(key)) continue;
                 const value = getValue(object[key]);
                 const filterValue = applyFilter(value, queries);
                 if (filterValue && iterable(value)) {
@@ -209,7 +214,7 @@ class MongooseDummy {
         return new Promise(resolve => resolve(iterate(model)));
     }
 
-    static reservedKeys() {
+    static get reservedKeys() {
         return ['_posts', '_pres', 'collection', 'emit', 'errors', 'get', 'init', 'isModified', 'isNew', 'listeners', 'modelName', 'on', 'once', 'populated', 'prototype', 'remove', 'removeListener', 'save', 'schema', 'toObject', 'validate']
     }
 
