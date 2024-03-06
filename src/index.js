@@ -7,7 +7,7 @@
  *
  * DESCRIPTION_LIBRARY
  *
-*/
+ */
 
 class MongooseDummy {
 
@@ -185,23 +185,35 @@ class MongooseDummy {
         const isArrayObject = (object) => !(Object.keys(object).some(key => typeof object[key] === 'object')) && fieldKey in object;
 
         /**
+         * Iterate over deeper objects
+         * @param key {String} - Key to iterate
+         * @param object {Object} - Schema
+         * @param deep {Boolean} - Config
+         * @returns {Promise<Awaited<{}|Awaited<*>[]|*|Array|Object|String|Boolean|Number>[]>|*|Array|Object|String|Boolean|Number|Promise<Awaited<{}|Awaited<*>[]|*|Array|Object|String|Boolean|Number>[]|*|Array|Object|String|Boolean|Number|{}>}
+         */
+        const generateDeeper = (key, object, deep) => {
+            const value = getValue(object[key]);
+            const filterValue = applyFilter(value, queries);
+            if (filterValue && iterable(value)) {
+                const needsPopulate = populate(value) && deep;
+                return iterate(needsPopulate ? getSchema(value) : value, !needsPopulate);
+            }
+            else if (isArrayIterable(value) || (filterValue && (fieldKey in value || 'enum' in value || isValidType(value)))) return getFakeValue(getValidSchema(value));
+        }
+        /**
          * Iterate over model
          * @param object {Object} - Model
          * @param deep {Boolean} - Iterate deeper or not
          * @returns {Promise<Awaited<{}|Awaited<*>[]|*|Array|Object|String|Boolean|Number>[]|*|Array|Object|String|Boolean|Number|{}>}
          */
         const iterate = async (object = {}, deep = true) => {
-            const output = {};
+            let output = {};
             if (typeof object !== 'object') return object;
             if (isArrayObject(object)) return getFakeValue(object);
-            for (const key in object) {
-                const value = getValue(object[key]);
-                const filterValue = applyFilter(value, queries);
-                if (filterValue && iterable(value)) {
-                    const needsPopulate = populate(value) && deep;
-                    output[key] = await iterate(needsPopulate ? getSchema(value) : value, !needsPopulate);
-                }
-                else if (isArrayIterable(value) || (filterValue && (fieldKey in value || 'enum' in value || isValidType(value)))) output[key] = await getFakeValue(getValidSchema(value));
+            if ('type' in object && object.patch) output = await generateDeeper('type', object, deep)
+            else for (const key in object) {
+                const generated = await generateDeeper(key, object, deep);
+                if (generated) output[key] = generated;
             }
             return output;
         }
