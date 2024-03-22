@@ -99,7 +99,7 @@ class MongooseDummy {
 
     evaluateObjectId(schema, filter = () => true) {
         const { ref, populate } = schema.options;
-        if (ref && populate) return this.iterate(this.getModel(ref), {}, 2);
+        if (ref && populate) return this.iterate(this.getModel(ref), {}, 2, filter);
         else if (this.constructor.canParse(schema)) return new Types.ObjectId();
         return undefined;
     }
