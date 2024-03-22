@@ -20,6 +20,7 @@ class MongooseDummy {
         if (!mongoose) throw new Error('Pass a valid mongoose instance.');
         this.mongooseInstance = mongoose;
         this.schemas = mongoose.models;
+        this.config = {};
     }
 
     /**
