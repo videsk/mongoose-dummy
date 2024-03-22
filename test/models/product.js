@@ -4,7 +4,7 @@ module.exports = function (mongoose) {
     const schema = new mongoose.Schema({
         name: {
             type: String,
-            dummy: '{{lorem.words}}'
+            dummy: () => '{{lorem.words}}'
         },
         price: {
             type: String,

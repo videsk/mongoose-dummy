@@ -4,18 +4,18 @@ module.exports = function (mongoose) {
     const scores = new mongoose.Schema({
         score: {
             type: Number,
-            dummy: '{{datatype.number}}'
+            dummy: () => '{{datatype.number}}'
         }
     });
 
     const answers = new mongoose.Schema({
         question: {
             type: String,
-            dummy: '{{lorem.text}}?'
+            dummy: () => '{{lorem.text}}?'
         },
         answer: {
             type: String,
-            dummy: '{{lorem.text}}'
+            dummy: () => '{{lorem.text}}'
         },
         scores: {
             type: [scores]
@@ -25,7 +25,7 @@ module.exports = function (mongoose) {
     const schema = new mongoose.Schema({
         name: {
             type: String,
-            dummy: '{{lorem.words}}'
+            dummy: () => '{{lorem.words}}'
         },
         answers: {
             type: [answers],

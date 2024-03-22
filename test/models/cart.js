@@ -3,7 +3,7 @@ module.exports = function (mongoose) {
     const schema = new mongoose.Schema({
         createdAt: {
             type: Date,
-            dummy: '{{date.past}}'
+            dummy: (generators) => generators.fake.date.anytime()
         },
         products: [
             {

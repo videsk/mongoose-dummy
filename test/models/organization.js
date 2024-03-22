@@ -3,22 +3,22 @@ module.exports = function (mongoose) {
     const schema = new mongoose.Schema({
         name: {
             type: String,
-            dummy: '{{company.companyName}}',
+            dummy:  () => '{{company.companyName}}',
         },
         address: {
             type: Object,
             city: {
                 type: String,
-                dummy: '{{address.cityName}}',
+                dummy: () => '{{address.cityName}}',
             },
             country: {
                 type: String,
-                dummy: '{{address.country}}'
+                dummy: () => '{{address.country}}'
             }
         },
         timezone: {
             type: String,
-            dummy: '{{address.timeZone}}'
+            dummy: () => '{{address.timeZone}}'
         },
         users: [
             {
@@ -26,10 +26,10 @@ module.exports = function (mongoose) {
                 user: {
                     type: mongoose.Schema.Types.ObjectId,
                     ref: 'users',
-                    dummy: '{{datatype.uuid}}'
+                    dummy: () => '{{datatype.uuid}}'
                 },
                 date: {
-                    dummy: '{{date.past}}'
+                    dummy: () => '{{date.past}}'
                 }
             }
         ],
@@ -38,11 +38,11 @@ module.exports = function (mongoose) {
                 type: Object,
                 url: {
                     type: String,
-                    dummy: '{{internet.url}}',
+                    dummy: () => '{{internet.url}}',
                 },
                 database: {
                     type: String,
-                    dummy: '{{database.type}}',
+                    dummy: () => '{{database.type}}',
                 },
             }
         ]

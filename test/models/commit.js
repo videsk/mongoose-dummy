@@ -11,7 +11,7 @@ module.exports = function (mongoose) {
         },
         message: {
             type: String,
-            dummy: '{{git.commitMessage}}'
+            dummy: () => '{{git.commitMessage}}'
         },
         user: {
             type: mongoose.Schema.Types.ObjectId,

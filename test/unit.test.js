@@ -246,11 +246,11 @@ describe('Test methods of MongooseDummy', function () {
     it('Iterate model through wrapper', async () => {
         const dummy = new MongooseDummy(mongoose);
         const output = await dummy.model('user').generate();
-        console.log('Output', output);
+        console.log('Output', JSON.stringify(output, null, ' '));
         expect(typeof output).to.be.equal('object');
         expect('name' in output).to.be.equal(true);
         expect(typeof output.name).to.be.equal('string');
-        expect(output.name).to.be.equal(dummy.baseModel.name.dummy);
+        expect(output.name).to.be.equal(dummy.objectModel.name.dummy);
     });
 
 });
