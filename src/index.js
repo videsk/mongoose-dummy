@@ -11,9 +11,6 @@
 const {
     Schema,
     Types,
-    SchemaType,
-    Schemas,
-    SchemaTypes,
 } = require('mongoose')
 
 
