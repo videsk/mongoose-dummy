@@ -1,31 +1,32 @@
 
-module.exports = function (mongoose) {
+export default function (mongoose) {
 
     const scores = new mongoose.Schema({
         score: {
             type: Number,
-            dummy: '{{datatype.number}}'
+            dummy: ({ faker }) => faker.number.int(),
         }
     });
 
     const answers = new mongoose.Schema({
         question: {
             type: String,
-            dummy: '{{lorem.text}}?'
+            dummy: ({ faker }) => faker.lorem.lines,
         },
         answer: {
             type: String,
-            dummy: '{{lorem.text}}'
+            dummy: ({ faker }) => faker.lorem.sentence(),
         },
         scores: {
-            type: [scores]
+            type: [scores],
+            dummy: true,
         },
     });
 
     const schema = new mongoose.Schema({
         name: {
             type: String,
-            dummy: '{{lorem.words}}'
+            dummy: ({ faker }) => faker.person.fullName(),
         },
         answers: {
             type: [answers],
@@ -35,6 +36,7 @@ module.exports = function (mongoose) {
                 validator: value => Array.isArray(value),
                 message: () => 'Testing value :)',
             },
+            dummy: true,
         },
     });
 

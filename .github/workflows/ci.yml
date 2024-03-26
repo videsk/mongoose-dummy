@@ -44,4 +44,4 @@ jobs:
         env:
           CC_TEST_REPORTER_ID: ${{secrets.CODECLIMATE_REPORTER_ID}}
         with:
-          coverageCommand: npm run coverage:report
+          coverageCommand: npm run coverage

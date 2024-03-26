@@ -1,6 +1,6 @@
-const mongoose = require('mongoose');
-const setupModels = require('./models');
+import mongoose from 'mongoose';
+import setupModels from './models/index.js';
 
 setupModels(mongoose);
 
-module.exports = mongoose;
+export default mongoose;

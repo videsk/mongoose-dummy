@@ -1,17 +1,18 @@
 
-module.exports = function (mongoose) {
+export default function (mongoose) {
     const schema = new mongoose.Schema({
         type: {
             type: String,
             enum: ['fix', 'feat', 'chore'],
+            dummy: true,
         },
         sha: {
             type: String,
-            dummy: '{{git.commitSha}}',
+            dummy: ({ faker }) => faker.git.commitSha(),
         },
         message: {
             type: String,
-            dummy: '{{git.commitMessage}}'
+            dummy: ({ faker }) => faker.lorem.paragraph(),
         },
         user: {
             type: mongoose.Schema.Types.ObjectId,

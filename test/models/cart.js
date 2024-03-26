@@ -1,18 +1,21 @@
 
-module.exports = function (mongoose) {
+export default function (mongoose) {
     const schema = new mongoose.Schema({
         createdAt: {
             type: Date,
-            dummy: '{{date.past}}'
+            dummy: (generators) => generators.fake.date.anytime()
         },
-        products: [
-            {
-                type: mongoose.Schema.Types.ObjectId,
-                ref: 'product',
-                populate: true,
-            }
-        ]
+        products: {
+            type: [
+                {
+                    type: mongoose.Schema.Types.ObjectId,
+                    ref: 'product',
+                    populate: true,
+                }
+            ],
+            dummy: true
+        }
     });
 
-    return mongoose.model('commit', schema);
+    return mongoose.model('cart', schema);
 }
