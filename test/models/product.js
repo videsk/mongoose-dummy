@@ -1,26 +1,29 @@
 
-module.exports = function (mongoose) {
+export default function (mongoose) {
 
     const schema = new mongoose.Schema({
         name: {
             type: String,
-            dummy: () => '{{lorem.words}}'
+            dummy: ({ faker }) => faker.lorem.words(),
         },
         price: {
-            type: String,
+            type: Number,
             dummy: () => Math.random(),
         },
         stock: {
-            type: String,
-            dummy: mock => mock('{{datatype.number}}') * 3,
+            type: Number,
+            dummy: ({ faker }) => faker.number.int(),
         },
         state: {
             type: String,
-            dummy: ['new', 'used', 'refused']
+            enum: ['new', 'used', 'refused'],
+            dummy: true,
         },
         variants: {
             type: Array,
-            dummy: (_, data) => data,
+            dummy() {
+                return [this.state, this.price];
+            },
         },
     });
 

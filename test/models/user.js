@@ -1,5 +1,5 @@
 
-module.exports = function (mongoose) {
+export default function (mongoose) {
 
     const subCredentials = new mongoose.Schema({
         name: {

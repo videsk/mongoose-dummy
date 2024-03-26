@@ -1,18 +1,4 @@
-/**
- * Copyright (C) CURRENT_YEAR by Videsk - All Rights Reserved
- * @name LIBRARY_NAME
- * @author Videsk
- * @license LICENSE
- * Written by AUTHOR_LIBRARY
- *
- * DESCRIPTION_LIBRARY
- *
-*/
-const {
-    Schema,
-    Types,
-} = require('mongoose')
-
+import { Schema, Types } from 'mongoose';
 
 class MongooseDummy {
 
@@ -20,7 +6,7 @@ class MongooseDummy {
         if (!mongoose) throw new Error('Pass a valid mongoose instance.');
         this.mongooseInstance = mongoose;
         this.schemas = mongoose.models;
-        this.config = {};
+        this.config = { generators: {} };
     }
 
     /**
@@ -31,6 +17,14 @@ class MongooseDummy {
     setup(parameters = {}) {
         this.config = Object.assign(this.config, parameters);
         return this;
+    }
+
+    set generators(generators) {
+        this.config.generators = Object.assign(this.config.generators, generators);
+    }
+
+    get generators() {
+        return this.config.generators;
     }
 
     /**
@@ -68,13 +62,19 @@ class MongooseDummy {
      * @returns {Object} The object model.
      */
     get objectModel() {
+        if (!this.baseModel) throw new Error('Set the model before try get the object with model() method.');
         return this.baseModel.obj;
     }
 
     iterate(schema, output = {}, iteration = 0, filter = () => true) {
         const { paths } = schema;
         for (const schemaType of Object.values(paths)) {
-            if (this.constructor.canParse(schemaType) && this.constructor.query(schemaType, filter)) output[schemaType.path] = this.evaluateDummy(schemaType, iteration, output, filter);
+            if (this.constructor.canParse(schemaType) && this.constructor.query(schemaType, filter)) {
+                schemaType
+                  .path
+                  .split('.')
+                  .reduce((accumulator, key, index, array) => accumulator[key] = accumulator[key] || (index === array.length - 1 ? this.evaluateDummy(schemaType, iteration, output, filter) : {}), output);
+            }
         }
         return output;
     }
@@ -84,7 +84,13 @@ class MongooseDummy {
         if (iteration > 2) return this.constructor.getFallbackValue(schema);
         const { length = arrayLength } = schema.options[dummyKey] || {};
 
-        if (schema.options[dummyKey] instanceof Function) return schema.options[dummyKey].call(output, this.config.generators);
+        if (schema.options[dummyKey] instanceof Function) {
+            try {
+                return schema.options[dummyKey].call(output, this.generators);
+            } catch (error) {
+                return this.constructor.getFallbackValue(schema);
+            }
+        }
         else if (schema instanceof Schema.Types.Subdocument) return this.iterate(schema.schema, {}, iteration);
         else if (schema instanceof Schema.Types.ObjectId) return this.evaluateObjectId(schema, filter);
         else if (schema instanceof Schema.Types.DocumentArray || schema instanceof Schema.Types.Array) return [...Array(length)].map(() => this.getArrayItem(schema, output, filter));
@@ -125,7 +131,7 @@ class MongooseDummy {
     }
 
     static generateStringBasedOnSchemaOptions(options = {}) {
-        const { enum: enumList, maxLength = 99, minLength = 0 } = options;
+        const { enum: enumList, maxLength = 99, minLength = 3 } = options;
         if (Array.isArray(enumList) && enumList.length > 0) return enumList[this.randomNumber(0, enumList.length - 1)];
         return [...Array(Math.floor(Math.random() * (maxLength - minLength + 1)) + minLength)].map(() => Math.random().toString(36)[2]).join('');
     }
@@ -139,4 +145,4 @@ class MongooseDummy {
     }
 }
 
-module.exports = MongooseDummy;
+export default MongooseDummy;

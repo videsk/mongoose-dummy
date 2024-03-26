@@ -1,51 +1,55 @@
 
-module.exports = function (mongoose) {
+export default function (mongoose) {
     const schema = new mongoose.Schema({
         name: {
             type: String,
-            dummy:  () => '{{company.companyName}}',
+            dummy:  ({ faker }) => faker.company.name(),
         },
         address: {
-            type: Object,
             city: {
                 type: String,
-                dummy: () => '{{address.cityName}}',
+                dummy: ({ faker }) => faker.location.city(),
             },
             country: {
                 type: String,
-                dummy: () => '{{address.country}}'
-            }
+                dummy: ({ faker }) => faker.location.country(),
+            },
         },
         timezone: {
             type: String,
-            dummy: () => '{{address.timeZone}}'
+            dummy: ({ faker }) => faker.location.timeZone(),
         },
-        users: [
-            {
-                type: Object,
-                user: {
-                    type: mongoose.Schema.Types.ObjectId,
-                    ref: 'users',
-                    dummy: () => '{{datatype.uuid}}'
+        users: {
+            type: [
+                {
+                    user: {
+                        type: mongoose.Schema.Types.ObjectId,
+                        ref: 'users',
+                        dummy: ({ faker }) => faker.database.mongodbObjectId(),
+                    },
+                    date: {
+                        type: Date,
+                        dummy: ({ faker }) => faker.date.anytime(),
+                    },
                 },
-                date: {
-                    dummy: () => '{{date.past}}'
+            ],
+            dummy: true,
+        },
+        servers: {
+            type: [
+                {
+                    url: {
+                        type: String,
+                        dummy: ({ faker }) => faker.image.url(),
+                    },
+                    database: {
+                        type: String,
+                        dummy: ({ faker }) => faker.database.collation(),
+                    },
                 }
-            }
-        ],
-        servers: [
-            {
-                type: Object,
-                url: {
-                    type: String,
-                    dummy: () => '{{internet.url}}',
-                },
-                database: {
-                    type: String,
-                    dummy: () => '{{database.type}}',
-                },
-            }
-        ]
+            ],
+            dummy: true,
+        }
     });
 
     return mongoose.model('organization', schema);

@@ -1,8 +1,8 @@
-const mongoose = require('../mongoose');
-const { faker } = require('@faker-js/faker');
-const { expect } = require('chai');
+import mongoose from '../mongoose.js';
+import { faker } from '@faker-js/faker';
+import { expect } from 'chai';
 
-module.exports = {
+export {
     mongoose,
     faker,
     expect,
