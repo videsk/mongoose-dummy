@@ -1,112 +1,64 @@
 # Mongoose Dummy
 
-A random data generator library based on mongoose schema, with very flexible implementation directly on yours mongoose models with populate feature, enum random selection, filter fields, and fully compatible with all random/fake data generator libraries.
+Mongoose Dummy is an advanced random data generator library tailored for Mongoose schemas. It enables flexible and direct implementation on your Mongoose models, supporting features like populate, enum random selection, and custom field filters. Now fully compatible with all major random/fake data generator libraries, it’s ideal for creating realistic testing and development environments.
 
-![Snyk Vulnerabilities for GitHub Repo](https://img.shields.io/snyk/vulnerabilities/github/videsk/mongoose-dummy)
-![GitHub branch checks state](https://img.shields.io/github/checks-status/videsk/mongoose-dummy/main)
-[![Maintainability](https://api.codeclimate.com/v1/badges/d5e306c79262abc19e62/maintainability)](https://codeclimate.com/github/videsk/mongoose-dummy/maintainability)
-[![Test Coverage](https://api.codeclimate.com/v1/badges/d5e306c79262abc19e62/test_coverage)](https://codeclimate.com/github/videsk/mongoose-dummy/test_coverage)
-![GitHub](https://img.shields.io/github/license/videsk/mongoose-dummy)
-![GitHub tag (latest SemVer)](https://img.shields.io/github/v/tag/videsk/mongoose-dummy)
-![GitHub commit activity (branch)](https://img.shields.io/github/commit-activity/w/videsk/mongoose-dummy)
+## Features
 
-# How to install
+- Direct integration with Mongoose models.
+- Support for the `populate` feature to mimic database references.
+- Enum random selection for fields defined with specific sets of values.
+- Custom field filters to fine-tune generated data.
+- Compatibility with third-party data generation libraries for extended customizability.
+- Customizable array lengths for generating lists of related documents.
 
-```
+## Installation
+
+Install via npm:
+
+```bash
 npm i @videsk/mongoose-dummy
 ```
 
-# How to use
+## Usage
 
-Is really simple to use in 3 lines you can generate. You need to provide a mongoose instance with models attached. 
+Generating fake data with Mongoose Dummy is straightforward:
 
-This allows to `MongooseDummy` have a reference for all of your models, and this is the way how we can populate between your models.
-
-```js
+```javascript
 const mongoose = require('mongoose');
 const MongooseDummy = require('@videsk/mongoose-dummy');
-// ES6
+
+// ES6 Import
 import MongooseDummy from '@videsk/mongoose-dummy';
 
 const dummy = new MongooseDummy(mongoose);
-const output = await dummy.model('users').generate();
-// { ... }
+const output = dummy.model('users').generate();
 ```
 
-Previously, before to execute the above code you need add a `dummy` key in your mongoose models. If you don't add the `dummy` key in some field, will be not included in the output. So, models without the `dummy` key will return empty object.
+Before using, ensure your Mongoose models contain a `dummy` key for any field you wish to include in the output. Fields without a `dummy` key will be ignored:
 
-```
-"dummy" key is reserved to MongooseDummy, which is not recognized by mongoose.
-So will never interfere in the normal behavior of your app.
-```
-
-
-For example:
-
-```js
+```javascript
 module.exports = function (mongoose) {
     const schema = new mongoose.Schema({
         name: {
             type: String,
-            dummy: '{{name.firstName}} {{name.lastName}}', // <-- here dummy key
+            dummy: function() { return 'Dynamic Name'; } // Function returning a string
         },
         org: {
-            type: String, // Will be not included in the output, not included dummy key
+            type: String, // Will be ignored in the output
         },
     });
 
     return mongoose.model('users', schema);
-}
+};
 ```
 
-`dummy` key could be any type of data `function`, `string`, `object`, `boolean`, etc. In some cases the behavior can change:
+The `dummy` key now supports only functions for dynamic data generation, enhancing flexibility and consistency across different data types.
 
-## Dummy as function
+## Populate Feature
 
-For `function` will be executed with the argument of `mock` option.
+To populate fields referencing other models, set `populate` to `true`:
 
-```js
-const schema = new mongoose.Schema({
-    name: {
-        type: String,
-        dummy: function (mockFunction) {
-            // here your code ...
-        },
-    },
-});
-```
-
-## Dummy as string
-
-For `string` will be passed as argument in the `mock` option.
-
-```js
-const schema = new mongoose.Schema({
-    name: {
-        type: String,
-        dummy: 'John Doe', // Fixed value, will not change when generate
-    },
-});
-```
-
-## Dummy as mustache string
-
-For mustache `string` will be passed as argument in the `mock` option.
-
-```js
-const schema = new mongoose.Schema({
-    name: {
-        type: String,
-        dummy: '{{firstname}}', // Useful to use with faker.js or custom mustache libraries like handlebars
-    },
-});
-```
-
-## Populate
-
-If you want to populate fields, set `populate` as `true`.
-
-```js
+```javascript
 const schema = new mongoose.Schema({
     org: {
         type: mongoose.Schema.Types.ObjectId,
@@ -116,130 +68,62 @@ const schema = new mongoose.Schema({
 });
 ```
 
-## Filters
+## Custom Filters
 
-You can filter the fields passing a `function` as argument in `generate` method. MongooseDummy will iterate over the fields and in every iteration will pass the object value to `filter` function if it's present. For example:
+Apply custom filters to refine which fields to include in the generated data:
 
-**By default, MongooseDummy only will iterate over the fields contains the key `dummy`.**
-
-```js
+```javascript
 function filter(object) {
-    // object is equal to { dummy: ... }
-    return object.include && object.arguments; // Example
+    return object.include && object.arguments; // Return true to include the field
 }
-const output = await dummy.model('users').generate(filter);
+const output = dummy.model('users').generate(filter);
 ```
 
-The returned value of filter `function` will need to be `boolean`.
+## Array Length Customization
 
-## Array length
+Set specific lengths for generated arrays:
 
-`MongooseDummy` is able to generate a specific array length, by default `3`. So, you can set the length of arrays in `setup` method:
-
-```js
-const dummy = await dummy.setup({ arrayLength: 20 }).model('users').generate();
+```javascript
+const dummy = dummy.setup({ arrayLength: 20 }).model('users').generate();
 ```
 
-**Array can be `strings`, `objects` or `arrays`.**
+## Integration with Third-party Libraries
 
-# Integration with third-party
+Integrate with libraries like Faker.js to enrich the variety of generated data:
 
-Exist libraries could help you to generate random data based on different parameters. Like:
-
-- [Faker](https://github.com/Marak/faker.js)
-- [Casual](https://github.com/boo1ean/casual)
-- [Chance](https://github.com/chancejs/chancejs)
-- [Mock](https://github.com/nuysoft/Mock)
-- [Fake data generator](https://github.com/Cambalab/fake-data-generator)
-- [Mocker data generator](https://github.com/danibram/mocker-data-generator/)
-- [JSON schema faker](https://github.com/json-schema-faker/json-schema-faker)
-- [JSON placeholder](https://github.com/typicode/jsonplaceholder)
-
-For example if you want to integrate Faker.js can you set on the options like this:
-
-```js
-const mongoose = require('mongoose');
-const faker = require('faker');
-const MongooseDummy = require('@videsk/mongoose-dummy');
+```javascript
+import { faker } from '@faker-js/faker';
 
 const dummy = new MongooseDummy(mongoose);
-const output = await dummy.setup({ mock: faker.fake }).model('users').generate();
-// This setup mock as function of faker.fake(mustacheTemplate);
+dummy.generators = { faker };
+const output = dummy.model('users').generate();
 ```
 
-Integration with casual.js
-```js
-const mongoose = require('mongoose');
-const faker = require('casual');
-const MongooseDummy = require('@videsk/mongoose-dummy');
+## Full Example
 
-const dummy = new MongooseDummy(mongoose);
-function casualIntegration(key, ...args) {
-    const helper = casual[key];
-    if (typeof helper === 'function') return helper(...args);
-    return helper;
-}
+Refer to the detailed example provided to see Mongoose Dummy in action, showcasing integration and customization:
 
-const output = await dummy.setup({ mock: casualIntegration }).model('users').generate();
-// This setup mock as function of faker.fake(mustacheTemplate);
+```javascript
+// Refer to the provided full example in documentation
 ```
 
-# Full example
+## Limitations
 
-```js
-// users.model.js
-module.exports = function (mongoose) {
-    const schema = new mongoose.Schema({
-        name: {
-            type: String,
-            dummy: '{{name.firstName}} {{name.lastName}}', // <-- here dummy key
-        },
-    });
+- The `populate` feature is limited to one iteration on referenced models to avoid circular dependencies.
+- Handlebars template support has been removed in favor of more versatile function-based solutions.
 
-    return mongoose.model('users', schema);
-}
-// --------------------------
+## Contributing
 
-// mongoose.js
-const mongoose = require('mongoose');
-const users = require('./users');
+Contributions are welcome. Please follow the contributing guidelines outlined in the repository.
 
-users(mongoose);
+## Tests
 
-module.exports = mongoose;
-// --------------------------
+Run the test suite using:
 
-// dummy.js
-const faker = require('faker');
-const mongoose = require('./mongoose');
-const MongooseDummy = require('@videsk/mongoose-dummy');
-
-const dummy = new MongooseDummy(mongoose);
-const output = await dummy.setup({ mock: faker.fake }).model('users').generate();
-// --------------------------
+```bash
+npm run test
 ```
 
-**It's highly recommended set `setup({ mock: faker.fake, faker: true })` for parse the output like `number`, `boolean`,  `object` and `array`. This is only compatible with faker.js**
-
-# Limitations
-
-Exist one limitation in populate feature, which is limited to 1 iteration on your referenced model. This avoids circular dependencies and got "maximum call stack exceeded". This is not optional!
-
-The iteration on your models is unlimited, that means can iterate very deeper, but is not recommended for performance. 
-
-
-# Why
-
-Exist libraries can do this, but are very limited on models schema or are only compatible with faker.js. Also, and most important can't populate or iterate deeper on your models, which are frustrating. So in our needs, are incomplete.
-
-This library you can use for different uses cases, but the most common is seeds databases, example json, documentation, or for integration test purposes.
-
-# Tests
-
-Run `npm run test` to execute with mocha, `npm run coverage` to execute mocha with nyc. 
-
-# License
+## License
 
 LGPL-2.1 License - By Videsk™
-
-[![FOSSA Status](https://app.fossa.com/api/projects/custom%2B15700%2Fgithub.com%2Fvidesk%2Fmongoose-dummy.svg?type=large)](https://app.fossa.com/projects/custom%2B15700%2Fgithub.com%2Fvidesk%2Fmongoose-dummy?ref=badge_large)
