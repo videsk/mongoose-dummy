@@ -12,8 +12,8 @@
     "test": "mocha",
     "coverage": "c8 npm run test"
   },
-  "main": "dist/index.cjs.js",
-  "module": "dist/index.esm.js",
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/videsk/mongoose-dummy.git"
