@@ -1,4 +1,6 @@
-import { Schema, Types } from 'mongoose';
+import mongoose from 'mongoose';
+import { v4 as uuid } from 'uuid';
+const { Schema, Types } = mongoose;
 
 class MongooseDummy {
 
@@ -91,7 +93,7 @@ class MongooseDummy {
                 return this.constructor.getFallbackValue(schema);
             }
         }
-        else if (schema instanceof Schema.Types.Subdocument) return this.iterate(schema.schema, {}, iteration);
+        else if (schema instanceof Types.Subdocument) return this.iterate(schema.schema, {}, iteration);
         else if (schema instanceof Schema.Types.ObjectId) return this.evaluateObjectId(schema, filter);
         else if (schema instanceof Schema.Types.DocumentArray || schema instanceof Schema.Types.Array) return [...Array(length)].map(() => this.getArrayItem(schema, output, filter));
         return this.constructor.getFallbackValue(schema);
@@ -112,17 +114,17 @@ class MongooseDummy {
     }
 
     static getFallbackValue(schema) {
-        const { Subdocument, Mixed, ObjectId, Number, Boolean, String, UUID, Map, Buffer, DocumentArray, BigInt, Decimal128 } = Schema.Types;
+        const { Mixed, ObjectId, Number, Boolean, String, UUID, Map, Buffer, DocumentArray, BigInt, Decimal128 } = Schema.Types;
         const { max, min, default: defaultValue } = schema.options;
         if (typeof defaultValue !== 'undefined') return defaultValue;
         if (schema instanceof Schema.Types.Array || schema instanceof DocumentArray) return new Types.Array();
-        else if (schema instanceof Subdocument || schema instanceof Mixed || schema instanceof Map) return {};
+        else if (schema instanceof Types.Subdocument || schema instanceof Mixed || schema instanceof Map) return {};
         else if (schema instanceof ObjectId) return new Types.ObjectId();
         else if (schema instanceof Number || schema instanceof BigInt || schema instanceof Decimal128) return this.randomNumber(min, max);
         else if (schema instanceof Boolean) return Math.random() < 0.5;
         else if (schema instanceof String || schema instanceof Buffer) return this.generateStringBasedOnSchemaOptions(schema.options);
         else if (schema instanceof Schema.Types.Date) return new Date();
-        else if (schema instanceof UUID) return new Types.UUID();
+        else if (schema instanceof (Schema.Types.UUID || String)) return uuid();
         return null;
     }
 
