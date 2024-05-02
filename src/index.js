@@ -71,7 +71,7 @@ class MongooseDummy {
     iterate(schema, output = {}, iteration = 0, filter = () => true) {
         const { paths } = schema;
         for (const schemaType of Object.values(paths)) {
-            if (this.constructor.canParse(schemaType) && this.constructor.query(schemaType, filter)) {
+            if (this.constructor.canParse(schemaType, this.config.dummyKey) && this.constructor.query(schemaType, filter)) {
                 schemaType
                   .path
                   .split('.')
