@@ -114,7 +114,7 @@ class MongooseDummy {
     }
 
     static getFallbackValue(schema) {
-        const { Mixed, ObjectId, Number, Boolean, String, UUID, Map, Buffer, DocumentArray, BigInt, Decimal128 } = Schema.Types;
+        const { Mixed, ObjectId, Number, Boolean, String, Map, Buffer, DocumentArray, BigInt, Decimal128 } = Schema.Types;
         const { max, min, default: defaultValue } = schema.options;
         if (typeof defaultValue !== 'undefined') return defaultValue;
         if (schema instanceof Schema.Types.Array || schema instanceof DocumentArray) return new Types.Array();
