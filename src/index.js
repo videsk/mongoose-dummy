@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import { v4 as uuid } from 'uuid';
-const { Schema, Types } = mongoose;
+const { Schema, Types, SchemaType } = mongoose;
 
 class MongooseDummy {
 
@@ -93,9 +93,9 @@ class MongooseDummy {
                 return this.constructor.getFallbackValue(schema);
             }
         }
-        else if (schema instanceof Types.Subdocument) return this.iterate(schema.schema, {}, iteration);
         else if (schema instanceof Schema.Types.ObjectId) return this.evaluateObjectId(schema, filter);
         else if (schema instanceof Schema.Types.DocumentArray || schema instanceof Schema.Types.Array) return [...Array(length)].map(() => this.getArrayItem(schema, output, filter));
+        else if (schema instanceof Types.Subdocument || (schema instanceof SchemaType && schema.schema?.paths)) return this.iterate(schema.schema, {}, iteration);
         return this.constructor.getFallbackValue(schema);
     }
 
@@ -114,7 +114,7 @@ class MongooseDummy {
     }
 
     static getFallbackValue(schema) {
-        const { Mixed, ObjectId, Number, Boolean, String, Map, Buffer, DocumentArray, BigInt, Decimal128 } = Schema.Types;
+        const { Mixed, ObjectId, Number, Boolean, String, Map, Buffer, BigInt = Number, DocumentArray, Decimal128 } = Schema.Types;
         const { max, min, default: defaultValue } = schema.options;
         if (typeof defaultValue !== 'undefined') return defaultValue;
         if (schema instanceof Schema.Types.Array || schema instanceof DocumentArray) return new Types.Array();
