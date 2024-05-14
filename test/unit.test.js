@@ -74,6 +74,9 @@ describe('Test methods of MongooseDummy', function () {
         expect('name' in output).to.be.equal(true);
         expect('org' in output).to.be.equal(true);
         expect(typeof output.name).to.be.equal('string');
+        expect(typeof output.credentials).to.be.equal('object');
+        expect(output.credentials).to.have.property('subCredentials')
+        expect(output.credentials).to.have.property('secretName')
     });
 
     it('Iterate model deeper', async () => {
