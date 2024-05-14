@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import { v4 as uuid } from 'uuid';
-const { Schema, Types } = mongoose;
+const { Schema, Types, SchemaType } = mongoose;
 
 class MongooseDummy {
 
@@ -83,6 +83,7 @@ class MongooseDummy {
 
     evaluateDummy(schema, iteration = 0, output = {}, filter = () => true) {
         const { arrayLength = 3, dummyKey = 'dummy' } = this.config || {};
+        const { instance } = schema;
         if (iteration > 2) return this.constructor.getFallbackValue(schema);
         const { length = arrayLength } = schema.options[dummyKey] || {};
 
@@ -93,9 +94,9 @@ class MongooseDummy {
                 return this.constructor.getFallbackValue(schema);
             }
         }
-        else if (schema instanceof Types.Subdocument) return this.iterate(schema.schema, {}, iteration);
-        else if (schema instanceof Schema.Types.ObjectId) return this.evaluateObjectId(schema, filter);
-        else if (schema instanceof Schema.Types.DocumentArray || schema instanceof Schema.Types.Array) return [...Array(length)].map(() => this.getArrayItem(schema, output, filter));
+        else if (schema instanceof Schema.Types.ObjectId || instance === 'ObjectId') return this.evaluateObjectId(schema, filter);
+        else if (schema instanceof Schema.Types.DocumentArray || schema instanceof Schema.Types.Array || instance === 'Array') return [...Array(length)].map(() => this.getArrayItem(schema, output, filter));
+        else if (schema instanceof Types.Subdocument || schema.schema?.paths || instance === 'Embedded') return this.iterate(schema.schema, {}, iteration);
         return this.constructor.getFallbackValue(schema);
     }
 
@@ -114,16 +115,17 @@ class MongooseDummy {
     }
 
     static getFallbackValue(schema) {
-        const { Mixed, ObjectId, Number, Boolean, String, Map, Buffer, DocumentArray, BigInt, Decimal128 } = Schema.Types;
+        const { Mixed, ObjectId, Number, Boolean, String, Map, Buffer, BigInt = Number, DocumentArray, Decimal128 } = Schema.Types;
         const { max, min, default: defaultValue } = schema.options;
+        const { instance } = schema;
         if (typeof defaultValue !== 'undefined') return defaultValue;
-        if (schema instanceof Schema.Types.Array || schema instanceof DocumentArray) return new Types.Array();
-        else if (schema instanceof Types.Subdocument || schema instanceof Mixed || schema instanceof Map) return {};
-        else if (schema instanceof ObjectId) return new Types.ObjectId();
-        else if (schema instanceof Number || schema instanceof BigInt || schema instanceof Decimal128) return this.randomNumber(min, max);
-        else if (schema instanceof Boolean) return Math.random() < 0.5;
-        else if (schema instanceof String || schema instanceof Buffer) return this.generateStringBasedOnSchemaOptions(schema.options);
-        else if (schema instanceof Schema.Types.Date) return new Date();
+        if (schema instanceof Schema.Types.Array || schema instanceof DocumentArray || instance === 'Array') return new Types.Array();
+        else if (schema instanceof Types.Subdocument || schema instanceof Mixed || schema instanceof Map || instance === 'Embedded') return {};
+        else if (schema instanceof ObjectId || instance === 'ObjectId') return new Types.ObjectId();
+        else if (schema instanceof Number || schema instanceof BigInt || schema instanceof Decimal128 || instance === 'Number') return this.randomNumber(min, max);
+        else if (schema instanceof Boolean || instance === 'Boolean') return Math.random() < 0.5;
+        else if (schema instanceof String || schema instanceof Buffer || instance === 'String') return this.generateStringBasedOnSchemaOptions(schema.options);
+        else if (schema instanceof Schema.Types.Date || instance === 'Date') return new Date();
         else if (schema instanceof (Schema.Types.UUID || String)) return uuid();
         return null;
     }
