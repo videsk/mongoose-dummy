@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import { v4 as uuid } from 'uuid';
-const { Schema, Types, SchemaType } = mongoose;
+const { Schema, Types } = mongoose;
 
 class MongooseDummy {
 
