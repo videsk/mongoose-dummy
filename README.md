@@ -1,129 +1,235 @@
-# Mongoose Dummy
+# 🎲 Mongoose Dummy
 
-Mongoose Dummy is an advanced random data generator library tailored for Mongoose schemas. It enables flexible and direct implementation on your Mongoose models, supporting features like populate, enum random selection, and custom field filters. Now fully compatible with all major random/fake data generator libraries, it’s ideal for creating realistic testing and development environments.
+> Create realistic test data for your Mongoose models with zero hassle! 
 
-## Features
+[![npm version](https://img.shields.io/npm/v/@videsk/mongoose-dummy.svg)](https://www.npmjs.com/package/@videsk/mongoose-dummy)
+[![License: LGPL-2.1](https://img.shields.io/badge/License-LGPL_2.1-blue.svg)](https://opensource.org/licenses/LGPL-2.1)
 
-- Direct integration with Mongoose models.
-- Support for the `populate` feature to mimic database references.
-- Enum random selection for fields defined with specific sets of values.
-- Custom field filters to fine-tune generated data.
-- Compatibility with third-party data generation libraries for extended customizability.
-- Customizable array lengths for generating lists of related documents.
+Mongoose Dummy is a powerful random data generator built specifically for Mongoose schemas. Generate realistic test data with support for complex relationships, nested objects, and custom generators. Perfect for testing, development, and seeding your MongoDB databases.
 
-## Installation
+## ✨ Features
 
-Install via npm:
+- 🔌 Seamless integration with Mongoose models
+- 🔄 Smart population of referenced models
+- 📋 Random selection from enum values
+- 🎯 Customizable field filters
+- 🔧 Flexible array length control
+- 🎨 Works with Faker.js and other data generation libraries
+- 📦 Support for nested objects and arrays
+- 🧪 Perfect for testing and development
+
+## 📦 Installation
 
 ```bash
-npm i @videsk/mongoose-dummy
+npm install @videsk/mongoose-dummy
 ```
 
-## Usage
-
-Generating fake data with Mongoose Dummy is straightforward:
+## 🚀 Quick Start
 
 ```javascript
-const mongoose = require('mongoose');
-const MongooseDummy = require('@videsk/mongoose-dummy');
-
-// ES6 Import
+import mongoose from 'mongoose';
 import MongooseDummy from '@videsk/mongoose-dummy';
+import { faker } from '@faker-js/faker';
 
+// Initialize with mongoose
 const dummy = new MongooseDummy(mongoose);
-const output = dummy.model('users').generate();
+
+// Add faker.js support
+dummy.generators = { faker };
+
+// Generate fake data
+const fakeUser = dummy.model('User').generate();
 ```
 
-Before using, ensure your Mongoose models contain a `dummy` key for any field you wish to include in the output. Fields without a `dummy` key will be ignored:
+## 📖 Usage Guide
+
+### 🏗️ Defining Schemas
+
+Add the `dummy` property to any field you want to generate data for:
 
 ```javascript
-module.exports = function (mongoose) {
-    const schema = new mongoose.Schema({
-        name: {
-            type: String,
-            dummy: function() { return 'Dynamic Name'; } // Function returning a string
-        },
-        org: {
-            type: String, // Will be ignored in the output
-        },
-    });
-
-    return mongoose.model('users', schema);
-};
-```
-
-The `dummy` key now supports only functions for dynamic data generation, enhancing flexibility and consistency across different data types.
-
-## Populate Feature
-
-To populate fields referencing other models, set `populate` to `true`:
-
-```javascript
-const schema = new mongoose.Schema({
-    org: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'organizations',
-        populate: true
+const userSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    dummy: ({ faker }) => faker.person.fullName()
+  },
+  email: {
+    type: String,
+    dummy: ({ faker }) => faker.internet.email()
+  },
+  address: {
+    street: {
+      type: String,
+      dummy: ({ faker }) => faker.location.streetAddress()
     },
+    city: {
+      type: String,
+      dummy: ({ faker }) => faker.location.city()
+    }
+  },
+  createdAt: {
+    type: Date,
+    dummy: ({ faker }) => faker.date.past()
+  }
 });
 ```
 
-## Custom Filters
+### 🔄 Working with References
 
-Apply custom filters to refine which fields to include in the generated data:
+Automatically populate referenced models:
 
 ```javascript
-function filter(object) {
-    return object.include && object.arguments; // Return true to include the field
-}
-const output = dummy.model('users').generate(filter);
+const orderSchema = new mongoose.Schema({
+  customer: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    populate: true,  // 👈 Will generate full user data
+    dummy: true
+  },
+  products: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Product',
+    populate: true,
+    dummy: true
+  }],
+  total: {
+    type: Number,
+    dummy: ({ faker }) => faker.number.float({ min: 10, max: 1000 })
+  }
+});
 ```
 
-## Array Length Customization
-
-Set specific lengths for generated arrays:
+### 📝 Smart Enum Handling
 
 ```javascript
-const dummy = dummy.setup({ arrayLength: 20 }).model('users').generate();
+const taskSchema = new mongoose.Schema({
+  status: {
+    type: String,
+    enum: ['pending', 'in-progress', 'completed'],
+    dummy: true  // 👈 Will randomly select from enum values
+  },
+  priority: {
+    type: String,
+    enum: ['low', 'medium', 'high'],
+    dummy: true
+  }
+});
 ```
 
-## Integration with Third-party Libraries
+### 🎯 Custom Field Filters
 
-Integrate with libraries like Faker.js to enrich the variety of generated data:
+Generate data only for specific fields:
 
 ```javascript
-import { faker } from '@faker-js/faker';
+// Only generate required fields
+const requiredOnly = dummy.model('User').generate(
+  options => options.required === true
+);
 
+// Only generate fields with specific validators
+const validatedFields = dummy.model('User').generate(
+  options => options.validate !== undefined
+);
+```
+
+### 📚 Array Configuration
+
+Control the length of generated arrays:
+
+```javascript
+// Global array length setting
 const dummy = new MongooseDummy(mongoose);
-dummy.generators = { faker };
-const output = dummy.model('users').generate();
+dummy.setup({ arrayLength: 5 });
+
+// Generate data with custom array length
+const data = dummy.model('Order').generate();
+// All arrays will have 5 items
 ```
 
-## Full Example
+### 🔗 Complex Relationships
 
-Refer to the detailed example provided to see Mongoose Dummy in action, showcasing integration and customization:
+Generate data with nested relationships and dependencies:
 
 ```javascript
-// Refer to the provided full example in documentation
+const companySchema = new mongoose.Schema({
+  name: {
+    type: String,
+    dummy: ({ faker }) => faker.company.name()
+  },
+  employees: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    populate: true,
+    dummy: true
+  }],
+  departments: [{
+    name: {
+      type: String,
+      dummy: ({ faker }) => faker.commerce.department()
+    },
+    manager: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      populate: true,
+      dummy: true
+    },
+    budget: {
+      type: Number,
+      dummy: ({ faker }) => faker.number.int({ min: 10000, max: 1000000 })
+    }
+  }]
+});
 ```
 
-## Limitations
+### 🎨 Custom Data Generation
 
-- The `populate` feature is limited to one iteration on referenced models to avoid circular dependencies.
-- Handlebars template support has been removed in favor of more versatile function-based solutions.
+Use values from other fields in your generators:
 
-## Contributing
+```javascript
+const productSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    dummy: ({ faker }) => faker.commerce.productName()
+  },
+  basePrice: {
+    type: Number,
+    dummy: ({ faker }) => faker.number.float({ min: 10, max: 1000 })
+  },
+  discountedPrice: {
+    type: Number,
+    dummy() {
+      return this.basePrice * 0.8; // Access other generated fields
+    }
+  }
+});
+```
 
-Contributions are welcome. Please follow the contributing guidelines outlined in the repository.
+## ⚠️ Limitations
 
-## Tests
+- 🔄 Populate feature is limited to one level deep to prevent circular dependencies
+- 🏷️ Fields without a `dummy` key are ignored in generation
+- 🔒 Some Mongoose features like virtual fields are not supported
 
-Run the test suite using:
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit issues and pull requests.
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## 🧪 Running Tests
 
 ```bash
-npm run test
+npm test
 ```
 
-## License
+## 📄 License
 
-LGPL-2.1 License - By Videsk™
+LGPL-2.1 License - Created with ❤️ by Videsk™
+
+## 🙏 Acknowledgments
+
+Special thanks to all contributors and the Mongoose community for making this project possible!
