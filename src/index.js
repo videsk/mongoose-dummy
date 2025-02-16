@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import { v4 as uuid } from 'uuid';
-const { Schema, Types, SchemaType } = mongoose;
+const { Schema, Types } = mongoose;
 
 class MongooseDummy {
 
@@ -84,7 +84,7 @@ class MongooseDummy {
     evaluateDummy(schema, iteration = 0, output = {}, filter = () => true) {
         const { arrayLength = 3, dummyKey = 'dummy' } = this.config || {};
         const { instance } = schema;
-        if (iteration > 2) return this.constructor.getFallbackValue(schema);
+        if (iteration >= 2) return this.constructor.getFallbackValue(schema);
         const { length = arrayLength } = schema.options[dummyKey] || {};
 
         if (schema.options[dummyKey] instanceof Function) {

@@ -25,6 +25,12 @@ export default function (mongoose) {
                 return [this.state, this.price];
             },
         },
+        alternative: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'product',
+            dummy: true,
+            populate: true,
+        }
     });
 
     return mongoose.model('product', schema);
