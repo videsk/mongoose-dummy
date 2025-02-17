@@ -90,7 +90,7 @@ class MongooseDummy {
         if (schema.options[dummyKey] instanceof Function) {
             try {
                 return schema.options[dummyKey].call(output, this.generators);
-            } catch (error) {
+            } catch {
                 return MongooseDummy.getFallbackValue(schema);
             }
         }
