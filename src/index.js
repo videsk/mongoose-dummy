@@ -71,11 +71,11 @@ class MongooseDummy {
     iterate(schema, output = {}, iteration = 0, filter = () => true) {
         const { paths } = schema;
         for (const schemaType of Object.values(paths)) {
-            if (this.constructor.canParse(schemaType, this.config.dummyKey) && this.constructor.query(schemaType, filter)) {
-                schemaType
-                  .path
-                  .split('.')
-                  .reduce((accumulator, key, index, array) => accumulator[key] = accumulator[key] || (index === array.length - 1 ? this.evaluateDummy(schemaType, iteration, output, filter) : {}), output);
+            if (MongooseDummy.canParse(schemaType, this.config.dummyKey) && MongooseDummy.query(schemaType, filter)) {
+                const pathParts = schemaType.path.split('.');
+                const finalKey = pathParts.pop();
+                const current = pathParts.reduce((accumulator, key) => accumulator[key] = accumulator[key] || {}, output);
+                current[finalKey] = this.evaluateDummy(schemaType, iteration, output, filter);
             }
         }
         return output;
@@ -84,33 +84,33 @@ class MongooseDummy {
     evaluateDummy(schema, iteration = 0, output = {}, filter = () => true) {
         const { arrayLength = 3, dummyKey = 'dummy' } = this.config || {};
         const { instance } = schema;
-        if (iteration >= 2) return this.constructor.getFallbackValue(schema);
+        if (iteration > 2) return MongooseDummy.getFallbackValue(schema);
         const { length = arrayLength } = schema.options[dummyKey] || {};
 
         if (schema.options[dummyKey] instanceof Function) {
             try {
                 return schema.options[dummyKey].call(output, this.generators);
             } catch (error) {
-                return this.constructor.getFallbackValue(schema);
+                return MongooseDummy.getFallbackValue(schema);
             }
         }
-        else if (schema instanceof Schema.Types.ObjectId || instance === 'ObjectId') return this.evaluateObjectId(schema, filter);
-        else if (schema instanceof Schema.Types.DocumentArray || schema instanceof Schema.Types.Array || instance === 'Array') return [...Array(length)].map(() => this.getArrayItem(schema, output, filter));
+        else if (schema instanceof Schema.Types.ObjectId || instance === 'ObjectId') return this.evaluateObjectId(schema, iteration, filter);
+        else if (schema instanceof Schema.Types.DocumentArray || schema instanceof Schema.Types.Array || instance === 'Array') return [...Array(length)].map(() => this.getArrayItem(schema, output, iteration, filter));
         else if (schema instanceof Types.Subdocument || schema.schema?.paths || instance === 'Embedded') return this.iterate(schema.schema, {}, iteration);
-        return this.constructor.getFallbackValue(schema);
+        return MongooseDummy.getFallbackValue(schema);
     }
 
-    getArrayItem(schema, output, filter = () => true) {
-        if (schema?.schema instanceof Schema) return this.iterate(schema.schema, {}, 2);
+    getArrayItem(schema, output, iteration = 0, filter = () => true) {
+        if (schema?.schema instanceof Schema) return this.iterate(schema.schema, {}, iteration + 1, filter);
         const itemSchema = schema.caster;
-        if (itemSchema instanceof Schema.Types.ObjectId) return this.evaluateObjectId(itemSchema, filter);
-        return this.evaluateDummy(itemSchema, 2, output, filter);
+        if (itemSchema instanceof Schema.Types.ObjectId) return this.evaluateObjectId(itemSchema, iteration, filter);
+        return this.evaluateDummy(itemSchema, iteration + 1, output, filter);
     }
 
-    evaluateObjectId(schema, filter = () => true) {
+    evaluateObjectId(schema, iteration = 0, filter = () => true) {
         const { ref, populate } = schema.options;
-        if (ref && populate) return this.iterate(this.getModel(ref), {}, 2, filter);
-        else if (this.constructor.canParse(schema)) return new Types.ObjectId();
+        if (ref && populate) return this.iterate(this.getModel(ref), {}, iteration + 1, filter);
+        else if (MongooseDummy.canParse(schema)) return new Types.ObjectId();
         return undefined;
     }
 
