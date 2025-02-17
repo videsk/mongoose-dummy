@@ -3,7 +3,7 @@ export default function (mongoose) {
     const schema = new mongoose.Schema({
         name: {
             type: String,
-            dummy:  ({ faker }) => faker.company.name(),
+            dummy: ({ faker }) => faker.company.name(),
         },
         address: {
             city: {
