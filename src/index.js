@@ -21,18 +21,50 @@ class MongooseDummy {
         return this;
     }
 
+    /**
+     * Set max populate depth
+     * @param value
+     */
     set maxPopulateDepth(value) {
         this.config.maxPopulateDepth = value;
     }
 
+    /**
+     * Get max populate depth
+     * @returns {number}
+     */
     get maxPopulateDepth() {
         return this.config.maxPopulateDepth;
     }
 
+    /**
+     * Set default filter
+     * @param value
+     */
+    set defaultFilter(value) {
+        this.config.defaultFilter = value;
+    }
+
+    /**
+     * Get default filter
+     * @returns {function(): boolean}
+     */
+    get defaultFilter() {
+        return this.config.defaultFilter;
+    }
+
+    /**
+     * Set dummy key
+     * @param generators
+     */
     set generators(generators) {
         this.config.generators = Object.assign(this.config.generators, generators);
     }
 
+    /**
+     * Get dummy key
+     * @returns {{}}
+     */
     get generators() {
         return this.config.generators;
     }
