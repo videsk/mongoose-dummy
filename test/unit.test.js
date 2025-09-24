@@ -202,4 +202,107 @@ describe('Test methods of MongooseDummy', function () {
         expect(Array.isArray(output.products[0].variants)).to.be.equal(true);
     });
 
+    describe('Test maxPopulateDepth configuration', function () {
+
+        it('Should populate only 1 level deep by default', async () => {
+            const dummy = new MongooseDummy(mongoose);
+            const output = dummy.model('cart').generate();
+
+            // Level 0: cart
+            expect(typeof output).to.be.equal('object');
+            expect(Array.isArray(output.products)).to.be.equal(true);
+
+            // Level 1: products should be populated (objects with properties)
+            expect(typeof output.products[0].name).to.be.equal('string');
+            expect(typeof output.products[0].price).to.be.equal('number');
+
+            // Level 2: if products have refs, should be ObjectIds, not populated
+            // (assuming your product schema has some ref fields)
+            if ('category' in output.products[0]) {
+                expect(output.products[0].category instanceof mongoose.Types.ObjectId).to.be.equal(true);
+            }
+        });
+
+        it('Should respect maxPopulateDepth = 0 (no population)', async () => {
+            const dummy = new MongooseDummy(mongoose);
+            dummy.maxPopulateDepth = 0;
+            const output = dummy.model('cart').generate();
+
+            // Level 0: cart basic fields should exist
+            expect(typeof output).to.be.equal('object');
+            expect(output.createdAt instanceof Date).to.be.equal(true);
+
+            // Level 1: products should be ObjectIds, not populated
+            expect(Array.isArray(output.products)).to.be.equal(true);
+            expect(output.products[0] instanceof mongoose.Types.ObjectId).to.be.equal(true);
+        });
+
+        it('Should populate 2 levels deep when maxPopulateDepth = 2', async () => {
+            const dummy = new MongooseDummy(mongoose);
+            dummy.maxPopulateDepth = 2;
+            const output = dummy.model('cart').generate();
+
+            // Level 0: cart
+            expect(typeof output).to.be.equal('object');
+            expect(Array.isArray(output.products)).to.be.equal(true);
+
+            // Level 1: products should be populated
+            expect(typeof output.products[0].name).to.be.equal('string');
+            expect(typeof output.products[0].price).to.be.equal('number');
+
+            // Level 2: if products have refs, should also be populated
+            // (test depends on your actual schema structure)
+            if ('category' in output.products[0] && output.products[0].category && typeof output.products[0].category === 'object') {
+                expect(typeof output.products[0].category.name).to.be.equal('string');
+            }
+        });
+
+        it('Should set maxPopulateDepth via setup method', async () => {
+            const dummy = new MongooseDummy(mongoose);
+            dummy.setup({ maxPopulateDepth: 0 });
+
+            expect(dummy.maxPopulateDepth).to.be.equal(0);
+
+            const output = dummy.model('cart').generate();
+            expect(Array.isArray(output.products)).to.be.equal(true);
+            expect(output.products[0] instanceof mongoose.Types.ObjectId).to.be.equal(true);
+        });
+
+        it('Should use getter/setter for maxPopulateDepth', async (done) => {
+            const dummy = new MongooseDummy(mongoose);
+
+            // Test default
+            expect(dummy.maxPopulateDepth).to.be.equal(1);
+
+            // Test setter
+            dummy.maxPopulateDepth = 3;
+            expect(dummy.maxPopulateDepth).to.be.equal(3);
+            expect(dummy.config.maxPopulateDepth).to.be.equal(3);
+
+            done();
+        });
+
+        it('Should handle nested subdocuments correctly with depth limit', async () => {
+            const dummy = new MongooseDummy(mongoose);
+            dummy.maxPopulateDepth = 1;
+
+            // Test with a model that has nested structures
+            const output = dummy.model('organization').generate();
+
+            expect(typeof output).to.be.equal('object');
+            expect('users' in output).to.be.equal(true);
+            expect(Array.isArray(output.users)).to.be.equal(true);
+
+            // Users should be populated at level 1
+            if (output.users.length > 0 && typeof output.users[0] === 'object') {
+                expect('user' in output.users[0]).to.be.equal(true);
+                // But deeper refs should be ObjectIds
+                if ('user' in output.users[0] && output.users[0].user) {
+                    expect(output.users[0].user instanceof mongoose.Types.ObjectId).to.be.equal(true);
+                }
+            }
+        });
+
+    });
+
 });

@@ -8,7 +8,7 @@ class MongooseDummy {
         if (!mongoose) throw new Error('Pass a valid mongoose instance.');
         this.mongooseInstance = mongoose;
         this.schemas = mongoose.models;
-        this.config = { generators: {} };
+        this.config = { generators: {}, maxPopulateDepth: 1 };
     }
 
     /**
@@ -19,6 +19,14 @@ class MongooseDummy {
     setup(parameters = {}) {
         this.config = Object.assign(this.config, parameters);
         return this;
+    }
+
+    set maxPopulateDepth(value) {
+        this.config.maxPopulateDepth = value;
+    }
+
+    get maxPopulateDepth() {
+        return this.config.maxPopulateDepth;
     }
 
     set generators(generators) {
@@ -82,9 +90,9 @@ class MongooseDummy {
     }
 
     evaluateDummy(schema, iteration = 0, output = {}, filter = () => true) {
-        const { arrayLength = 3, dummyKey = 'dummy' } = this.config || {};
+        const { arrayLength = 3, dummyKey = 'dummy', maxPopulateDepth } = this.config || {};
         const { instance } = schema;
-        if (iteration > 2) return MongooseDummy.getFallbackValue(schema);
+        if (iteration > maxPopulateDepth) return MongooseDummy.getFallbackValue(schema);
         const { length = arrayLength } = schema.options[dummyKey] || {};
 
         if (schema.options[dummyKey] instanceof Function) {
@@ -109,7 +117,8 @@ class MongooseDummy {
 
     evaluateObjectId(schema, iteration = 0, filter = () => true) {
         const { ref, populate } = schema.options;
-        if (ref && populate) return this.iterate(this.getModel(ref), {}, iteration + 1, filter);
+        const { maxPopulateDepth } = this.config;
+        if (ref && populate && iteration < maxPopulateDepth) return this.iterate(this.getModel(ref), {}, iteration + 1, filter);
         else if (MongooseDummy.canParse(schema)) return new Types.ObjectId();
         return undefined;
     }
