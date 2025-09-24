@@ -8,7 +8,7 @@ class MongooseDummy {
         if (!mongoose) throw new Error('Pass a valid mongoose instance.');
         this.mongooseInstance = mongoose;
         this.schemas = mongoose.models;
-        this.config = { generators: {}, maxPopulateDepth: 1 };
+        this.config = { generators: {}, maxPopulateDepth: 1, defaultFilter: () => true };
     }
 
     /**
@@ -21,18 +21,50 @@ class MongooseDummy {
         return this;
     }
 
+    /**
+     * Set max populate depth
+     * @param value
+     */
     set maxPopulateDepth(value) {
         this.config.maxPopulateDepth = value;
     }
 
+    /**
+     * Get max populate depth
+     * @returns {number}
+     */
     get maxPopulateDepth() {
         return this.config.maxPopulateDepth;
     }
 
+    /**
+     * Set default filter
+     * @param value
+     */
+    set defaultFilter(value) {
+        this.config.defaultFilter = value;
+    }
+
+    /**
+     * Get default filter
+     * @returns {function(): boolean}
+     */
+    get defaultFilter() {
+        return this.config.defaultFilter;
+    }
+
+    /**
+     * Set dummy key
+     * @param generators
+     */
     set generators(generators) {
         this.config.generators = Object.assign(this.config.generators, generators);
     }
 
+    /**
+     * Get dummy key
+     * @returns {{}}
+     */
     get generators() {
         return this.config.generators;
     }
@@ -42,8 +74,8 @@ class MongooseDummy {
      * @param filter {Function} - Filter keys by queries
      * @returns {Promise<unknown>}
      */
-    generate(filter = () => true) {
-        return this.iterate(this.baseModel, {}, 0, filter);
+    generate(filter) {
+        return this.iterate(this.baseModel, {}, 0, filter || this.config.defaultFilter);
     }
 
     /**

@@ -121,6 +121,9 @@ const taskSchema = new mongoose.Schema({
 Generate data only for specific fields:
 
 ```javascript
+// Replace default filter
+dummy.defaultFilter = options => options.customKey;
+
 // Only generate required fields
 const requiredOnly = dummy.model('User').generate(
   options => options.required === true
