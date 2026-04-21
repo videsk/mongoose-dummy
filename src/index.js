@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { v4 as uuid } from 'uuid';
+import { randomUUID } from 'node:crypto';
 const { Schema, Types } = mongoose;
 
 class MongooseDummy {
@@ -167,7 +167,7 @@ class MongooseDummy {
         else if (schema instanceof Boolean || instance === 'Boolean') return Math.random() < 0.5;
         else if (schema instanceof String || schema instanceof Buffer || instance === 'String') return this.generateStringBasedOnSchemaOptions(schema.options);
         else if (schema instanceof Schema.Types.Date || instance === 'Date') return new Date();
-        else if (schema instanceof (Schema.Types.UUID || String)) return uuid();
+        else if (schema instanceof (Schema.Types.UUID || String)) return randomUUID();
         return null;
     }
 
