@@ -71,11 +71,13 @@ class MongooseDummy {
 
     /**
      * Generate fake document
-     * @param filter {Function} - Filter keys by queries
-     * @returns {Promise<unknown>}
+     * @param filter {Function=} - Filter keys by queries
+     * @param modelName {String=} - Filter keys by queries
+     * @returns {Promise<Object>}
      */
-    generate(filter) {
-        return this.iterate(this.baseModel, {}, 0, filter || this.config.defaultFilter);
+    generate(filter, modelName) {
+        const model = modelName && typeof modelName === 'string' ? this.getModel(modelName) : this.baseModel;
+        return this.iterate(model, {}, 0, filter || this.config.defaultFilter);
     }
 
     /**
