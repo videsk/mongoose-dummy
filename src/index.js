@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { v4 as uuid } from 'uuid';
+import { randomUUID } from 'node:crypto';
 const { Schema, Types } = mongoose;
 
 class MongooseDummy {
@@ -71,11 +71,13 @@ class MongooseDummy {
 
     /**
      * Generate fake document
-     * @param filter {Function} - Filter keys by queries
-     * @returns {Promise<unknown>}
+     * @param filter {Function=} - Filter keys by queries
+     * @param modelName {String=} - Filter keys by queries
+     * @returns {Promise<Object>}
      */
-    generate(filter) {
-        return this.iterate(this.baseModel, {}, 0, filter || this.config.defaultFilter);
+    generate(filter, modelName) {
+        const model = modelName && typeof modelName === 'string' ? this.getModel(modelName) : this.baseModel;
+        return this.iterate(model, {}, 0, filter || this.config.defaultFilter);
     }
 
     /**
@@ -167,7 +169,7 @@ class MongooseDummy {
         else if (schema instanceof Boolean || instance === 'Boolean') return Math.random() < 0.5;
         else if (schema instanceof String || schema instanceof Buffer || instance === 'String') return this.generateStringBasedOnSchemaOptions(schema.options);
         else if (schema instanceof Schema.Types.Date || instance === 'Date') return new Date();
-        else if (schema instanceof (Schema.Types.UUID || String)) return uuid();
+        else if (schema instanceof (Schema.Types.UUID || String)) return randomUUID();
         return null;
     }
 

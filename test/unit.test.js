@@ -190,6 +190,14 @@ describe('Test methods of MongooseDummy', function () {
         expect(typeof output.name).to.be.equal('string');
     });
 
+    it('Iterate model defining as second argument in generate', async () => {
+        const dummy = new MongooseDummy(mongoose);
+        const output = dummy.generate(null, 'user');
+        expect(typeof output).to.be.equal('object');
+        expect('name' in output).to.be.equal(true);
+        expect(typeof output.name).to.be.equal('string');
+    });
+
     it('Generate correctly array with reference to another model', async () => {
         const dummy = new MongooseDummy(mongoose);
         const output = dummy.model('cart').generate();
