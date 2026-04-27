@@ -144,7 +144,7 @@ class MongooseDummy {
 
     getArrayItem(schema, output, iteration = 0, filter = () => true) {
         if (schema?.schema instanceof Schema) return this.iterate(schema.schema, {}, iteration + 1, filter);
-        const itemSchema = schema.caster;
+        const itemSchema = schema.caster ?? schema.embeddedSchemaType;
         if (itemSchema instanceof Schema.Types.ObjectId) return this.evaluateObjectId(itemSchema, iteration, filter);
         return this.evaluateDummy(itemSchema, iteration + 1, output, filter);
     }
